@@ -1,4 +1,4 @@
-README for File::Find::Rule 0.23
+README for File::Find::Rule 0.24_01
 
 =head1 NAME
 
@@ -48,6 +48,13 @@ What changed over the last 3 revisions
 
 =over
 
+=item 0.24_01 Saturday 4th October, 2003
+
+	when you specify an extra of C<{ follow => 1 }> File::Find stops
+	populating $File::Find::topdir.  This leads to warnings noise so
+	instead we now track $topdir ourselves.
+
+
 =item 0.23 Friday 3rd October, 2003
 
 	make the extras hash work and add a proper test for it. (Doh!)
@@ -56,12 +63,6 @@ What changed over the last 3 revisions
 =item 0.22 Friday 3rd October, 2003
 
 	add in ->extras hash for passing things through to File::Find::find
-
-
-=item 0.21 Monday 15th September, 2003 
-
-	pod glitch in File::Find::Rule::Procedural spotted and fixed
-	by Tom Hukins
 
 =back
 
