@@ -1,3 +1,6 @@
+0.07	25th October, 2002
+	- Tweaks required to let extensions work
+
 0.06	22nd October, 2002
 	-> Fix the code example for the ->grep clause (again from
 	   Douglas Wilson)

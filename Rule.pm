@@ -1,4 +1,4 @@
-#       $Id: Rule.pm 804 2002-10-22 07:27:00Z richardc $
+#       $Id: Rule.pm 846 2002-10-25 15:46:01Z richardc $
 
 package File::Find::Rule;
 use strict;
@@ -6,11 +6,12 @@ use vars qw/$VERSION @ISA @EXPORT/;
 use Exporter;
 use File::Spec;
 use Text::Glob 'glob_to_regex';
+use Number::Compare;
 use Carp qw/croak/;
 use File::Find (); # we're only wrapping for now
 use Cwd;           # 5.00503s File::Find goes screwy with max_depth == 0
 
-$VERSION = 0.06;
+$VERSION = 0.07;
 @ISA = 'Exporter';
 @EXPORT = qw( find rule );
 
@@ -83,7 +84,6 @@ like so:
 
 =cut
 
-my %takes_args; # [1]
 *rule = \&find;
 sub find {
     my $object = __PACKAGE__->new();
@@ -99,7 +99,7 @@ sub find {
             $not = 1;
             next;
         }
-        if ($takes_args{$method}) {
+        unless (defined prototype $method) {
             my $args = shift;
             @args = ref $args eq 'ARRAY' ? @$args : $args;
         }
@@ -163,7 +163,6 @@ expressions.
 
 =cut
 
-$takes_args{name} = 1;
 sub name {
     my $self = _force_object shift;
     my @names = map { ref $_ eq "Regexp" ? $_ : glob_to_regex $_ } @_;
@@ -240,7 +239,7 @@ C<accessed>, C<changed>), they have been included for completeness.
 
     # XXX - this may be better done lazily via AUTOLOAD
     for my $test (keys %tests) {
-        my $sub = eval ' sub {
+        my $sub = eval ' sub () {
             my $self = _force_object shift;
             push @{ $self->{rules} },
               {
@@ -261,22 +260,14 @@ C<mode>, C<nlink>, C<uid>, C<gid>, C<rdev>, C<size>, C<atime>,
 C<mtime>, C<ctime>, C<blksize>, and C<blocks>.  See L<perlfunc/stat>
 for details.
 
-Each of these can take a target value, which may be relative.
+Each of these can take a number of targets, which will follow
+L<Number::Compare> semantics.
 
  $rule->size( 7 );         # exactly 7
- $rule->size( ">7" );      # greater than 7
+ $rule->size( ">7Ki" );    # larger than 7 * 1024 * 1024 bytes
  $rule->size( ">=7" )
       ->size( "<=90" );    # between 7 and 90, inclusive
  $rule->size( 7, 9, 42 );  # 7, 9 or 42
-
-This value may also use magnitudes of kilobytes (C<k>, C<ki>), megabytes
-(C<m>, C<mi>), or gigabytes (C<g>, C<gi>).  Those suffixed with an
-C<i> use the appropriate 2**n version in accordance with the IEC
-standard: http://physics.nist.gov/cuu/Units/binary.html
-
- $rule->size( '>200M'  ); # larger than 200,000,000 bytes
- $rule->size( '>200Mi' ); # larger than 209,715,200 bytse
- $rule->size( '<=200k' ); # 200,000 bytes or fewer
 
 =cut
 
@@ -286,31 +277,11 @@ standard: http://physics.nist.gov/cuu/Units/binary.html
 
     my $i = 0;
     for my $t (@tests) {
-        $takes_args{$t} = 1;
         my $index = $i; # needs to be here so it can be closed over
         my $sub = sub {
             my $self = _force_object shift;
 
-            my @tests;
-            for my $test (@_) {
-                $test =~ m{^
-                           ([<>]=?)?   # comparison
-                           (.*?)       # value
-                           ([kmg]i?)?  # magnitude
-                           $}ix
-                  or croak "don't understand '$test' as a test";
-
-                my $comparison = $1 || '==';
-                my $target     = $2;
-                my $magnitude  = $3;
-                $target *=           1000 if lc $magnitude eq 'k';
-                $target *=           1024 if lc $magnitude eq 'ki';
-                $target *=        1000000 if lc $magnitude eq 'm';
-                $target *=      1024*1024 if lc $magnitude eq 'mi';
-                $target *=     1000000000 if lc $magnitude eq 'g';
-                $target *= 1024*1024*1024 if lc $magnitude eq 'gi';
-                push @tests, "$comparison $target";
-            }
+            my @tests = map { Number::Compare->new($_) } @_;
 
             push @{ $self->{rules} },
               { rule => $t,
@@ -318,7 +289,7 @@ standard: http://physics.nist.gov/cuu/Units/binary.html
                 code => sub {
                     my $value = (stat $_)[$index];
                     for my $test (@tests) {
-                        return 1 if eval "$value $test";
+                        return 1 if $test->($value);
                     }
                     return 0;
                 },
@@ -346,8 +317,6 @@ interchangeable.
 
 =cut
 
-$takes_args{any} = 1;
-$takes_args{or}  = 1;
 sub any {
     my $self = _force_object shift;
     my @rulesets = @_;
@@ -381,8 +350,6 @@ interchangeable.
 
 =cut
 
-$takes_args{not}  = 1;
-$takes_args{none} = 1;
 sub not {
     my $self = _force_object shift;
     my @rulesets = @_;
@@ -410,7 +377,7 @@ Traverse no further.  This rule always matches.
 
 =cut
 
-sub prune {
+sub prune () {
     my $self = _force_object shift;
 
     push @{ $self->{rules} },
@@ -427,7 +394,7 @@ Don't keep this file.  This rule always matches.
 
 =cut
 
-sub discard {
+sub discard () {
     my $self = _force_object shift;
 
     push @{ $self->{rules} },
@@ -452,7 +419,6 @@ Return a true value if your rule matched.
 
 =cut
 
-$takes_args{exec} = 1;
 sub exec {
     my $self = _force_object shift;
     my $code = shift;
@@ -483,7 +449,6 @@ shebang line.
 
 =cut
 
-$takes_args{grep} = 1;
 sub grep {
     my $self = _force_object shift;
     my @pattern = map {
@@ -530,7 +495,6 @@ used.
 =cut
 
 for my $setter (qw( maxdepth mindepth )) {
-    $takes_args{$setter} = 1;
     my $sub = sub {
         my $self = _force_object shift;
         $self->{$setter} = shift;
@@ -578,7 +542,6 @@ directories.
 
 =cut
 
-$takes_args{in} = 1;
 sub in {
     my $self = _force_object shift;
 
@@ -620,7 +583,6 @@ iterator.
 
 =cut
 
-$takes_args{start} = 1;
 sub start {
     my $self = _force_object shift;
 
@@ -720,7 +682,10 @@ under the same terms as Perl itself.
 
 =head1 SEE ALSO
 
-L<File::Find>, find(1)
+L<File::Find>, L<Text::Glob>, L<Number::Compare>, find(1)
+
+And if you have an idea for a neat extension
+L<File::Find::Rule::Extending>
 
 =cut
 
