@@ -1,4 +1,4 @@
-#       $Id: Rule.pm,v 1.46 2002/08/24 17:30:15 richardc Exp $
+#       $Id: Rule.pm,v 1.47 2002/09/10 08:49:51 richardc Exp $
 
 package File::Find::Rule;
 use strict;
@@ -10,7 +10,7 @@ use Carp qw/croak/;
 use File::Find (); # we're only wrapping for now
 use Cwd;           # 5.00503s File::Find goes screwy with max_depth == 0
 
-$VERSION = 0.03;
+$VERSION = 0.04;
 @ISA = 'Exporter';
 @EXPORT = qw( find rule );
 
@@ -192,6 +192,7 @@ details.  None of these methods take arguments.
  ------|-------------        ------|----------------
    -r  |  readable             -R  |  r_readable
    -w  |  writeable            -W  |  r_writeable
+   -w  |  writable             -W  |  r_writable
    -x  |  executable           -X  |  r_executable
    -o  |  owned                -O  |  r_owned
        |                           |
@@ -220,6 +221,7 @@ C<accessed>, C<changed>), they have been included for completeness.
     my %tests = (
                  -r  =>  readable           =>  -R  =>  r_readable      =>
                  -w  =>  writeable          =>  -W  =>  r_writeable     =>
+                 -w  =>  writable           =>  -W  =>  r_writable      =>
                  -x  =>  executable         =>  -X  =>  r_executable    =>
                  -o  =>  owned              =>  -O  =>  r_owned         =>
 
