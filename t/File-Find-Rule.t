@@ -1,5 +1,5 @@
 #!perl -w
-#       $Id: File-Find-Rule.t,v 1.22 2002/10/11 21:49:21 richardc Exp $
+#       $Id: File-Find-Rule.t 804 2002-10-22 07:27:00Z richardc $
 
 use strict;
 use Test::More tests => 30;
