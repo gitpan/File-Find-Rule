@@ -1,4 +1,4 @@
-#       $Id: Rule.pm 1298 2003-06-20 23:28:48Z richardc $
+#       $Id: Rule.pm 1301 2003-06-22 21:50:16Z richardc $
 
 package File::Find::Rule;
 use strict;
@@ -10,7 +10,7 @@ use Carp qw/croak/;
 use File::Find (); # we're only wrapping for now
 use Cwd;           # 5.00503s File::Find goes screwy with max_depth == 0
 
-$VERSION = '0.20_01';
+$VERSION = '0.20_02';
 
 # we'd just inherit from Exporter, but I want the colon
 sub import {
@@ -136,9 +136,18 @@ expressions.
 
 =cut
 
+sub _flatten {
+    my @flat;
+    while (@_) {
+        my $item = shift;
+        ref $item eq 'ARRAY' ? push @_, @{ $item } : push @flat, $item;
+    }
+    return @flat;
+}
+
 sub name {
     my $self = _force_object shift;
-    my @names = map { ref $_ eq "Regexp" ? $_ : glob_to_regex $_ } @_;
+    my @names = map { ref $_ eq "Regexp" ? $_ : glob_to_regex $_ } _flatten( @_ );
 
     push @{ $self->{rules} }, {
         rule => 'name',

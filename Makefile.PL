@@ -1,7 +1,7 @@
     use ExtUtils::MakeMaker;
     WriteMakefile
       ('DISTNAME' => 'File-Find-Rule',
-       'VERSION' => '0.20_01',
+       'VERSION' => '0.20_02',
        'PL_FILES' => {},
        'PREREQ_PM' => {
 			'Test::More' => '0',

@@ -1,8 +1,8 @@
 #!perl -w
-#       $Id: File-Find-Rule.t 1296 2003-06-19 14:41:49Z richardc $
+#       $Id: File-Find-Rule.t 1301 2003-06-22 21:50:42Z richardc $
 
 use strict;
-use Test::More tests => 34;
+use Test::More tests => 36;
 
 my $class;
 my @tests = qw( t/File-Find-Rule.t t/findrule.t );
@@ -30,6 +30,18 @@ $f = $class->name( '*.t' );
 is_deeply( [ sort $f->in('t') ],
           \@tests,
           "name( '*.t' )" );
+
+$f = $class->name( 'foobar', '*.t' );
+is_deeply( [ sort $f->in('t') ],
+           [ @tests, 't/foobar' ],
+           "name( 'foobar', '*.t' )" );
+
+$f = $class->name( [ 'foobar', '*.t' ] );
+is_deeply( [ sort $f->in('t') ],
+           [ @tests, 't/foobar' ],
+           "name( [ 'foobar', '*.t' ] )" );
+
+
 
 # exec
 $f = $class->exec(sub { length == 6 })->maxdepth(1);

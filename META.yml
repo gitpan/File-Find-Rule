@@ -1,6 +1,6 @@
 --- #YAML:1.0
 name: File-Find-Rule
-version: 0.20_01
+version: 0.20_02
 license: perl
 distribution_type: module
 requires:
@@ -16,5 +16,5 @@ conflicts: {}
 provides:
   File::Find::Rule:
     file: lib/File/Find/Rule.pm
-    version: 0.20_01
+    version: 0.20_02
 generated_by: Module::Build version 0.18
