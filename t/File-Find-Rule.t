@@ -1,5 +1,5 @@
 #!perl -w
-#       $Id: File-Find-Rule.t 1641 2003-10-03 22:56:02Z richardc $
+#       $Id: File-Find-Rule.t 1735 2003-10-22 17:00:23Z richardc $
 
 use strict;
 use Test::More tests => 38;
@@ -10,6 +10,10 @@ BEGIN {
     $class = 'File::Find::Rule';
     use_ok($class)
 }
+
+# on win32 systems the t/foobar file isn't 10 bytes it's 11, so the
+# previous tests on the magic number 10 failed.  rt.cpan.org #3838
+my $foobar_size = -s 't/foobar';
 
 my $f = $class->new;
 isa_ok($f, $class);
@@ -49,7 +53,7 @@ is_deeply( [ $f->in('t') ],
            [ 't/foobar' ],
            "exec (short)" );
 
-$f = $class->exec(sub { length > 10 })->maxdepth(1);
+$f = $class->exec(sub { length > $foobar_size })->maxdepth(1);
 is_deeply( [ $f->in('t') ],
            [ 't/File-Find-Rule.t' ],
            "exec (long)" );
@@ -60,7 +64,7 @@ is_deeply( [ find( maxdepth => 1, exec => sub { $_[2] eq 't/foobar' }, in => 't'
 
 # name and exec, chained
 $f = $class
-  ->exec(sub { length > 10 })
+  ->exec(sub { length > $foobar_size })
   ->name( qr/\.t$/ );
 
 is_deeply( [ $f->in('t') ],
@@ -68,7 +72,7 @@ is_deeply( [ $f->in('t') ],
            "exec(match) and name(match)" );
 
 $f = $class
-  ->exec(sub { length > 10 })
+  ->exec(sub { length > $foobar_size })
   ->name( qr/foo/ )
   ->maxdepth(1);
 
@@ -81,7 +85,7 @@ is_deeply( [ $f->in('t') ],
 $f = $class
   ->directory
   ->maxdepth(1)
-  ->exec(sub { $_ ne '.svn' }); # ignore .svn dir
+  ->exec(sub { $_ !~ /(\.svn|CVS)/ }); # ignore .svn/CVS dirs
 
 is_deeply( [ $f->in('t') ],
            [ qw( t t/lib  ) ],
@@ -91,7 +95,7 @@ is_deeply( [ $f->in('t') ],
 # any/or
 $f = $class->any( $class->exec( sub { length == 6 } ),
                   $class->name( qr/\.t$/ )
-                        ->exec( sub { length > 10 } )
+                        ->exec( sub { length > $foobar_size } )
                 )->maxdepth(1);
 
 is_deeply( [ sort $f->in('t') ],
@@ -100,7 +104,7 @@ is_deeply( [ sort $f->in('t') ],
 
 $f = $class->or( $class->exec( sub { length == 6 } ),
                  $class->name( qr/\.t$/ )
-                       ->exec( sub { length > 10 } )
+                       ->exec( sub { length > $foobar_size } )
                )->maxdepth(1);
 
 is_deeply( [ sort $f->in('t') ],
@@ -132,7 +136,7 @@ is_deeply( [ $f->in('t') ],
 # this test may be a little meaningless for a cpan release, but it
 # fires perfectly in my dev sandbox
 $f = $class->or( $class->directory
-                        ->name('.svn')
+                        ->name(qr/(\.svn|CVS)/)
                         ->prune
                         ->discard,
                  $class->new->file );
@@ -145,7 +149,7 @@ is_deeply( [ sort $f->in('t') ],
 
 # procedural form of the CVS demo
 $f = find(or => [ find( directory =>
-                        name      => '.svn',
+                        name      => qr/(\.svn|CVS)/,
                         prune     =>
                         discard   => ),
                   find( file => ) ]);
@@ -156,17 +160,19 @@ is_deeply( [ sort $f->in('t') ],
          );
 
 # size (stat test)
-is_deeply( [ find( maxdepth => 1, file => size => 10, in => 't' ) ],
+is_deeply( [ find( maxdepth => 1, file => size => $foobar_size, in => 't' ) ],
            [ 't/foobar' ],
-           "size 10 (stat)" );
+           "size $foobar_size (stat)" );
 
-is_deeply( [ find( maxdepth => 1, file => size => "<= 10", in => 't' ) ],
+is_deeply( [ find( maxdepth => 1, file => size => "<= $foobar_size",
+                   in => 't' ) ],
            [ 't/foobar' ],
-           "size <= 10 (stat)" );
+           "size <= $foobar_size (stat)" );
 
-is_deeply( [ find( maxdepth => 1, file => size => "<11", in => 't' ) ],
+is_deeply( [ find( maxdepth => 1, file => size => "<".($foobar_size + 1),
+                   in => 't' ) ],
            [ 't/foobar' ],
-           "size <11 (stat)" );
+           "size <($foobar_size + 1) (stat)" );
 
 is_deeply( [ find( maxdepth => 1, file => size => "<1K",
                    exec => sub { length == 6 },
@@ -196,7 +202,7 @@ is_deeply( [ find( maxdepth => 0, in => 't' ) ],
            "maxdepth == 0" );
 
 
-is_deeply( [ sort +find( or => [ find( name => '.svn',
+is_deeply( [ sort +find( or => [ find( name => qr/(\.svn|CVS)/,
                                        discard =>),
                                  find(),
                                ],
@@ -213,7 +219,7 @@ my @ateam_path = qw( t/lib
                      t/lib/File/Find/Rule/Test
                      t/lib/File/Find/Rule/Test/ATeam.pm );
 
-is_deeply( [ sort +find( or => [ find( name => '.svn',
+is_deeply( [ sort +find( or => [ find( name => qr/(\.svn|CVS)/,
                                        prune =>
                                        discard =>),
                                  find( ),
@@ -224,7 +230,7 @@ is_deeply( [ sort +find( or => [ find( name => '.svn',
            "mindepth == 1" );
 
 
-is_deeply( [ sort +find( or => [ find( name => '.svn',
+is_deeply( [ sort +find( or => [ find( name => qr/(\.svn|CVS)/,
                                        discard =>),
                                  find(),
                                ],
@@ -240,7 +246,7 @@ find( extras => { preprocess => sub { $ok = 1 } }, in => 't' );
 ok( $ok, "extras preprocess fired" );
 
 #iterator
-$f = find( or => [ find( name => '.svn',
+$f = find( or => [ find( name => qr/(\.svn|CVS)/,
                          prune =>
                          discard =>),
                    find(),
