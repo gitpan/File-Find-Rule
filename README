@@ -1,4 +1,4 @@
-README for File::Find::Rule 0.26
+README for File::Find::Rule 0.27
 
 =head1 NAME
 
@@ -29,7 +29,6 @@ This module has external dependencies on the following modules:
  Cwd
  File::Find
  File::Spec
- Module::Build	0.18
  Number::Compare
  Test::More
  Text::Glob
@@ -49,6 +48,14 @@ What changed over the last 3 revisions
 
 =over
 
+=item 0.27 Wednesday 25th February, 2004
+
+
+	Changed to write_makefile_pl to 'traditional' from
+	'passthrough'.  Fixes INDIRECTLY REPORTED install problems
+	caused by new Module::Build being backwards incompatible.
+
+
 =item 0.26 Monday 10th November, 2003
 
 	Typo/thinko in File::Find::Rule::Extending corrected (spotted
@@ -67,13 +74,6 @@ What changed over the last 3 revisions
 	always be 10 bytes in size. (rt.cpan.org #3838)
 
 	now we install the findrule script
-
-
-=item 0.24 Monday 6th October, 2003
-
-	when you specify an extra of C<{ follow => 1 }> File::Find stops
-	populating $File::Find::topdir.  This leads to warnings noise so
-	instead we now track $topdir ourselves.
 
 =back
 
