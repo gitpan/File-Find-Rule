@@ -1,4 +1,4 @@
-#       $Id: Rule.pm,v 1.47 2002/09/10 08:49:51 richardc Exp $
+#       $Id: Rule.pm,v 1.48 2002/10/11 21:49:20 richardc Exp $
 
 package File::Find::Rule;
 use strict;
@@ -10,7 +10,7 @@ use Carp qw/croak/;
 use File::Find (); # we're only wrapping for now
 use Cwd;           # 5.00503s File::Find goes screwy with max_depth == 0
 
-$VERSION = 0.04;
+$VERSION = 0.05;
 @ISA = 'Exporter';
 @EXPORT = qw( find rule );
 
@@ -22,7 +22,7 @@ File::Find::Rule - Alternative interface to File::Find
 
   use File::Find::Rule;
   # find all the subdirectories of a given directory
-  my @subdirs = File::Find::Rule->directory->find( $directory );
+  my @subdirs = File::Find::Rule->directory->in( $directory );
 
   # find all the .pm files in @INC
   my @files = File::Find::Rule->file()
@@ -461,6 +461,54 @@ sub exec {
       { name => 'exec',
         code => sub { $code->(@_) ? 1 : 0 } };
     $self;
+}
+
+=item ->grep( @specifiers );
+
+Opens a file and tests it each line at a time.
+
+For each line it evaluates each of the specifiers, stopping at the
+first successful match.  A specifier may be a regular expression or a
+subroutine.  The subroutine will be invoked with the same parameters
+as an ->exec subroutine.
+
+It is possible to provide a set of negative specifiers by enclosing
+them in anonymous arrays.  Should a negative specifier match the
+iteration is aborted and the clause is failed.  For example:
+
+ $rule->grep( qr/^#!.*\bperl/ }, [ sub { 1 } ] );
+
+Is a passing clause if the first line of a file looks like a perl
+shebang line.
+
+=cut
+
+$takes_args{grep} = 1;
+sub grep {
+    my $self = _force_object shift;
+    my @pattern = map {
+        ref $_
+          ? ref $_ eq 'ARRAY'
+            ? map { [ ( ref $_ ? $_ : qr/$_/ ) => 0 ] } @$_
+            : [ $_ => 1 ]
+          : [ qr/$_/ => 1 ]
+      } @_;
+
+    $self->exec( sub {
+                     local *FILE;
+                     open FILE, $_ or return;
+                     local ($_, $.);
+                     while (<FILE>) {
+                         for my $p (@pattern) {
+                             my ($rule, $ret) = @$p;
+                             return $ret
+                               if ref $rule eq 'Regexp'
+                                 ? /$rule/
+                                 : $rule->(@_);
+                         }
+                     }
+                     return;
+                 } );
 }
 
 =item C<maxdepth( $level )>

@@ -1,8 +1,8 @@
 #!perl -w
-#       $Id: File-Find-Rule.t,v 1.21 2002/08/24 17:30:16 richardc Exp $
+#       $Id: File-Find-Rule.t,v 1.22 2002/10/11 21:49:21 richardc Exp $
 
 use strict;
-use Test::More tests => 29;
+use Test::More tests => 30;
 
 my $class;
 my $this = "t/File-Find-Rule.t";
@@ -222,3 +222,7 @@ is_deeply( [ find( file => '!name' => qr/^[^.]{1,8}(\.[^.]{,3})?$/,
            [ $this ],
            "negating in the procedural interface" );
 
+# grep
+is_deeply( [ find( file => grep => [ qr/bytes./, [ qr/.?/ ] ], in => 't' ) ],
+           [ 't/foobar' ],
+           "grep" );
