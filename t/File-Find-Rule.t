@@ -1,8 +1,8 @@
 #!perl -w
-#       $Id: File-Find-Rule.t 846 2002-10-25 15:46:01Z richardc $
+#       $Id: File-Find-Rule.t 952 2002-12-04 13:52:26Z richardc $
 
 use strict;
-use Test::More tests => 30;
+use Test::More tests => 37;
 
 my $class;
 my $this = "t/File-Find-Rule.t";
@@ -106,6 +106,15 @@ is_deeply( [ $f->in('t') ],
            [ $this ],
            "not" );
 
+# not as not_*
+$f = $class
+  ->file
+  ->not_name( qr/^[^.]{1,8}(\.[^.]{,3})?$/ )
+  ->maxdepth(1)
+  ->exec(sub { length == 6 || length > 10 });
+is_deeply( [ $f->in('t') ],
+           [ $this ],
+           "not_*" );
 
 # prune/discard (.svn demo)
 # this test may be a little meaningless for a cpan release, but it
@@ -231,3 +240,27 @@ is_deeply( [ find( file => '!name' => qr/^[^.]{1,8}(\.[^.]{,3})?$/,
 is_deeply( [ find( maxdepth => 1, file => grep => [ qr/bytes./, [ qr/.?/ ] ], in => 't' ) ],
            [ 't/foobar' ],
            "grep" );
+
+# extra tests for findrule.  these are more for testing the parsing code.
+
+sub run ($) {
+    [ sort split /\n/, `$^X -Iblib/lib -Iblib/arch findrule $_[0] 2>&1` ];
+}
+
+is_deeply(run 't -file -name foobar', [ 't/foobar' ],
+          '-file -name foobar');
+
+is_deeply(run 't -maxdepth 0 -directory',
+          [ 't' ], 'last clause has no args');
+
+is_deeply(run 't -file -name \( foobar \*.t \)',
+          [ $this, 't/foobar' ], 'grouping ()');
+
+is_deeply(run 't -file -name foobar baz',
+          [ "unknown option 'baz'" ], 'no implicit grouping');
+
+is_deeply(run 't -maxdepth 0 -name -file',
+          [], 'terminate at next -');
+
+is_deeply(run 't -name \( -foo foobar \)',
+          [ 't/foobar' ], 'grouping ( -literal )');

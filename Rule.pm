@@ -1,8 +1,8 @@
-#       $Id: Rule.pm 846 2002-10-25 15:46:01Z richardc $
+#       $Id: Rule.pm 952 2002-12-04 13:52:26Z richardc $
 
 package File::Find::Rule;
 use strict;
-use vars qw/$VERSION @ISA @EXPORT/;
+use vars qw/$VERSION @ISA @EXPORT $AUTOLOAD/;
 use Exporter;
 use File::Spec;
 use Text::Glob 'glob_to_regex';
@@ -11,7 +11,7 @@ use Carp qw/croak/;
 use File::Find (); # we're only wrapping for now
 use Cwd;           # 5.00503s File::Find goes screwy with max_depth == 0
 
-$VERSION = 0.07;
+$VERSION = 0.08;
 @ISA = 'Exporter';
 @EXPORT = qw( find rule );
 
@@ -135,7 +135,7 @@ sub new {
     bless { rules    => [],  # [0]
             iterator => [],
             maxdepth => undef,
-            mindepth => undef
+            mindepth => undef,
           }, $class;
 }
 
@@ -504,6 +504,34 @@ for my $setter (qw( maxdepth mindepth )) {
     *$setter = $sub;
 }
 
+=item C<not_*>
+
+Negated version of the rule.  An effective shortand related to ! in
+the procedural interface.
+
+ $foo->not_name('*.pl');
+
+ $foo->not( $foo->new->name('*.pl' ) );
+
+=cut
+
+sub DESTROY {}
+sub AUTOLOAD {
+    $AUTOLOAD =~ /::not_([^:]*)$/
+      or croak "Can't locate method $AUTOLOAD";
+    my $method = $1;
+
+    my $sub = sub {
+        my $self = _force_object shift;
+        $self->not( $self->new->$method(@_) );
+    };
+    {
+        no strict 'refs';
+        *$AUTOLOAD = $sub;
+    }
+    &$sub;
+}
+
 =back
 
 =head2 Query Methods
@@ -550,6 +578,7 @@ sub in {
     File::Find::find
         (
          sub {
+             (my $path = $File::Find::name) =~ s#^\./##;
              my $depth = scalar File::Spec->splitdir($File::Find::name);
              my $maxdepth = $self->{maxdepth};
              my $mindepth = $self->{mindepth};
@@ -560,10 +589,10 @@ sub in {
              defined $mindepth && $depth <= $mindepth
                and return;
 
-             push @found, $File::Find::name
+             push @found, $path
                if $self->test($_,
                               $File::Find::dir,
-                              $File::Find::name);
+                              $path);
          }, @_);
     chdir $cwd;
 
@@ -695,9 +724,6 @@ Implementation notes:
 repeatedly from match.  It'll probably be way more effecient to
 instead eval-string compile a dedicated matching sub, and call that to
 avoid the repeated sub dispatch.
-
-[1] This hash is filled close to the source, which is especially
-useful as half of our methods are auto-generated.
 
 [*] There's probably a win to be made with the current model in making
 stat calls use C<_>.  For
