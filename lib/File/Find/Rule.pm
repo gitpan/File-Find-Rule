@@ -1,4 +1,4 @@
-#       $Id: Rule.pm 1562 2003-09-08 17:40:48Z richardc $
+#       $Id: Rule.pm 1586 2003-09-15 12:15:42Z richardc $
 
 package File::Find::Rule;
 use strict;
@@ -10,7 +10,7 @@ use Carp qw/croak/;
 use File::Find (); # we're only wrapping for now
 use Cwd;           # 5.00503s File::Find goes screwy with max_depth == 0
 
-$VERSION = '0.20';
+$VERSION = '0.21';
 
 # we'd just inherit from Exporter, but I want the colon
 sub import {
