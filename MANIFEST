@@ -1,4 +1,5 @@
 MANIFEST
+Changes
 Makefile.PL
 Rule.pm
 t/File-Find-Rule.t

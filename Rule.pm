@@ -1,4 +1,4 @@
-#       $Id: Rule.pm,v 1.43 2002/07/26 12:59:00 richardc Exp $
+#       $Id: Rule.pm,v 1.44 2002/08/14 22:24:22 richardc Exp $
 
 package File::Find::Rule;
 use strict;
@@ -10,7 +10,7 @@ use Text::Glob 'glob_to_regex';
 use Carp qw/croak/;
 use File::Find (); # we're only wrapping for now
 
-$VERSION = 0.01;
+$VERSION = 0.02;
 @ISA = 'Exporter';
 @EXPORT = qw( find rule );
 
@@ -459,7 +459,7 @@ sub exec {
 
     push @{ $self->{rules} },
       { name => 'exec',
-        code => sub { $code->() ? 1 : 0 } };
+        code => sub { $code->(@_) ? 1 : 0 } };
     $self;
 }
 

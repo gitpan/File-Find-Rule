@@ -1,8 +1,8 @@
 #!perl -w
-#       $Id: File-Find-Rule.t,v 1.18 2002/07/24 13:25:10 richardc Exp $
+#       $Id: File-Find-Rule.t,v 1.19 2002/08/14 22:24:22 richardc Exp $
 
 use strict;
-use Test::More tests => 28;
+use Test::More tests => 29;
 
 my $class;
 my $this = "t/File-Find-Rule.t";
@@ -42,6 +42,9 @@ is_deeply( [ $f->in('t') ],
            [ $this ],
            "exec (long)" );
 
+is_deeply( [ find( exec => sub { $_[2] eq 't/foobar' }, in => 't' ) ],
+           [ 't/foobar' ],
+           "exec (check arg 2)" );
 
 # name and exec, chained
 $f = $class
