@@ -1,0 +1,20 @@
+--- #YAML:1.0
+name: File-Find-Rule
+version: 0.20_03
+license: perl
+distribution_type: module
+requires:
+  Cwd: 0
+  File::Find: 0
+  File::Spec: 0
+  Number::Compare: 0
+  Test::More: 0
+  Text::Glob: 0
+recommends: {}
+build_requires: {}
+conflicts: {}
+provides:
+  File::Find::Rule:
+    file: lib/File/Find/Rule.pm
+    version: 0.20_03
+generated_by: Module::Build version 0.19
