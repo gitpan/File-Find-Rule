@@ -4,7 +4,7 @@ use ExtUtils::MakeMaker;
 WriteMakefile
   (
    NAME        => 'File::Find::Rule',
-   VERSION     => '0.22',
+   VERSION     => '0.23',
    PL_FILES    => {},
    INSTALLDIRS => 'site',
    PREREQ_PM   => {
