@@ -1,4 +1,4 @@
-#       $Id: Rule.pm 2258 2004-02-25 10:54:21Z richardc $
+#       $Id: Rule.pm 2482 2004-05-18 20:34:31Z richardc $
 
 package File::Find::Rule;
 use strict;
@@ -10,7 +10,7 @@ use Carp qw/croak/;
 use File::Find (); # we're only wrapping for now
 use Cwd;           # 5.00503s File::Find goes screwy with max_depth == 0
 
-$VERSION = '0.27';
+$VERSION = '0.28';
 
 # we'd just inherit from Exporter, but I want the colon
 sub import {
@@ -194,40 +194,40 @@ C<accessed>, C<changed>), they have been included for completeness.
 
 =cut
 
-{
-    my %tests = (
-                 -r  =>  readable           =>  -R  =>  r_readable      =>
-                 -w  =>  writeable          =>  -W  =>  r_writeable     =>
-                 -w  =>  writable           =>  -W  =>  r_writable      =>
-                 -x  =>  executable         =>  -X  =>  r_executable    =>
-                 -o  =>  owned              =>  -O  =>  r_owned         =>
+use vars qw( %X_tests );
+%X_tests = (
+    -r  =>  readable           =>  -R  =>  r_readable      =>
+    -w  =>  writeable          =>  -W  =>  r_writeable     =>
+    -w  =>  writable           =>  -W  =>  r_writable      =>
+    -x  =>  executable         =>  -X  =>  r_executable    =>
+    -o  =>  owned              =>  -O  =>  r_owned         =>
 
-                 -e  =>  exists             =>  -f  =>  file            =>
-                 -z  =>  empty              =>  -d  =>  directory       =>
-                 -s  =>  nonempty           =>  -l  =>  symlink         =>
-                                            =>  -p  =>  fifo            =>
-                 -u  =>  setuid             =>  -S  =>  socket          =>
-                 -g  =>  setgid             =>  -b  =>  block           =>
-                 -k  =>  sticky             =>  -c  =>  character       =>
-                                            =>  -t  =>  tty             =>
-                 -M  =>  modified                                       =>
-                 -A  =>  accessed           =>  -T  =>  ascii           =>
-                 -C  =>  changed            =>  -B  =>  binary          =>
-                );
+    -e  =>  exists             =>  -f  =>  file            =>
+    -z  =>  empty              =>  -d  =>  directory       =>
+    -s  =>  nonempty           =>  -l  =>  symlink         =>
+                               =>  -p  =>  fifo            =>
+    -u  =>  setuid             =>  -S  =>  socket          =>
+    -g  =>  setgid             =>  -b  =>  block           =>
+    -k  =>  sticky             =>  -c  =>  character       =>
+                               =>  -t  =>  tty             =>
+    -M  =>  modified                                       =>
+    -A  =>  accessed           =>  -T  =>  ascii           =>
+    -C  =>  changed            =>  -B  =>  binary          =>
+   );
 
-    for my $test (keys %tests) {
-        my $sub = eval 'sub () {
-            my $self = _force_object shift;
-            push @{ $self->{rules} }, {
-                code => "' . $test . ' \$_",
-                rule => "'.$tests{$test}.'",
-            };
-            $self;
-        } ';
-        no strict 'refs';
-        *{ $tests{$test} } = $sub;
-    }
+for my $test (keys %X_tests) {
+    my $sub = eval 'sub () {
+        my $self = _force_object shift;
+        push @{ $self->{rules} }, {
+            code => "' . $test . ' \$_",
+            rule => "'.$X_tests{$test}.'",
+        };
+        $self;
+    } ';
+    no strict 'refs';
+    *{ $X_tests{$test} } = $sub;
 }
+
 
 =item stat tests
 
@@ -247,12 +247,12 @@ L<Number::Compare> semantics.
 
 =cut
 
+use vars qw( @stat_tests );
+@stat_tests = qw( dev ino mode nlink uid gid rdev
+                  size atime mtime ctime blksize blocks );
 {
-    my @test_names = qw( dev ino mode nlink uid gid rdev
-                         size atime mtime ctime blksize blocks );
-
     my $i = 0;
-    for my $test (@test_names) {
+    for my $test (@stat_tests) {
         my $index = $i++; # to close over
         my $sub = sub {
             my $self = _force_object shift;
@@ -581,11 +581,16 @@ sub in {
     for my $path (@_) {
         # $topdir is used for relative and maxdepth
         $topdir = $path;
-        File::Find::find( { %{ $self->{extras} }, wanted => $sub }, $path );
+        $self->_call_find( { %{ $self->{extras} }, wanted => $sub }, $path );
     }
     chdir $cwd;
 
     return @found;
+}
+
+sub _call_find {
+    my $self = shift;
+    File::Find::find( @_ );
 }
 
 sub _compile {

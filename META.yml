@@ -1,6 +1,6 @@
 --- #YAML:1.0
 name: File-Find-Rule
-version: 0.27
+version: 0.28
 author:
   - |-
     Richard Clamp <richardc@unixbeard.net> with input gained from this
@@ -17,5 +17,5 @@ requires:
 provides:
   File::Find::Rule:
     file: lib/File/Find/Rule.pm
-    version: 0.27
-generated_by: Module::Build version 0.23
+    version: 0.28
+generated_by: Module::Build version 0.24
