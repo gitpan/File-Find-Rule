@@ -8,6 +8,7 @@ WriteMakefile(
                                'Text::Glob' => 0,
                                'File::Find' => 0,
                                'File::Spec' => 0,
+                               'Cwd'        => 0,
                               },
               AUTHOR       => 'Richard Clamp <richardc@unixbeard.net>',
              );

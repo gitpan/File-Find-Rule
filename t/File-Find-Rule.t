@@ -1,5 +1,5 @@
 #!perl -w
-#       $Id: File-Find-Rule.t,v 1.19 2002/08/14 22:24:22 richardc Exp $
+#       $Id: File-Find-Rule.t,v 1.21 2002/08/24 17:30:16 richardc Exp $
 
 use strict;
 use Test::More tests => 29;
@@ -179,6 +179,7 @@ is_deeply( [ sort +find( or => [ find( name => 'CVS',
            [ 't', $this, 't/foobar' ],
            "maxdepth == 1" );
 
+
 is_deeply( [ sort +find( or => [ find( name => 'CVS',
                                        prune =>
                                        discard =>),
@@ -189,6 +190,7 @@ is_deeply( [ sort +find( or => [ find( name => 'CVS',
            [ $this, 't/foobar' ],
            "mindepth == 1" );
 
+
 is_deeply( [ sort +find( or => [ find( name => 'CVS',
                                        discard =>),
                                  find(),
@@ -198,7 +200,6 @@ is_deeply( [ sort +find( or => [ find( name => 'CVS',
                          in => 't' ) ],
            [ $this, 't/foobar' ],
            "maxdepth = 1 mindepth == 1" );
-
 
 #iterator
 $f = find( or => [ find( name => 'CVS',

@@ -1,3 +1,6 @@
+0.03	24th August, 2002
+	- backport to 5.00503 (hadn't tested before this point)
+
 0.02	14th August, 2002
 	- bugfix ->exec subrule invocation (thanks to Chris Carline
 	  for pointing this out)

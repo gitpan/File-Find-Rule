@@ -1,19 +1,18 @@
-#       $Id: Rule.pm,v 1.44 2002/08/14 22:24:22 richardc Exp $
+#       $Id: Rule.pm,v 1.46 2002/08/24 17:30:15 richardc Exp $
 
 package File::Find::Rule;
 use strict;
-use warnings;
 use vars qw/$VERSION @ISA @EXPORT/;
 use Exporter;
 use File::Spec;
 use Text::Glob 'glob_to_regex';
 use Carp qw/croak/;
 use File::Find (); # we're only wrapping for now
+use Cwd;           # 5.00503s File::Find goes screwy with max_depth == 0
 
-$VERSION = 0.02;
+$VERSION = 0.03;
 @ISA = 'Exporter';
 @EXPORT = qw( find rule );
-
 
 =head1 NAME
 
@@ -292,7 +291,6 @@ standard: http://physics.nist.gov/cuu/Units/binary.html
 
             my @tests;
             for my $test (@_) {
-                my $test = shift;
                 $test =~ m{^
                            ([<>]=?)?   # comparison
                            (.*?)       # value
@@ -534,6 +532,7 @@ $takes_args{in} = 1;
 sub in {
     my $self = _force_object shift;
 
+    my $cwd = getcwd;
     my @found;
     File::Find::find
         (
@@ -553,6 +552,7 @@ sub in {
                               $File::Find::dir,
                               $File::Find::name);
          }, @_);
+    chdir $cwd;
 
     return @found;
 }
