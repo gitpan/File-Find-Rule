@@ -1,9 +1,8 @@
-#       $Id: Rule.pm 952 2002-12-04 13:52:26Z richardc $
+#       $Id: Rule.pm 1041 2003-01-21 10:53:10Z richardc $
 
 package File::Find::Rule;
 use strict;
-use vars qw/$VERSION @ISA @EXPORT $AUTOLOAD/;
-use Exporter;
+use vars qw/$VERSION $AUTOLOAD/;
 use File::Spec;
 use Text::Glob 'glob_to_regex';
 use Number::Compare;
@@ -11,9 +10,22 @@ use Carp qw/croak/;
 use File::Find (); # we're only wrapping for now
 use Cwd;           # 5.00503s File::Find goes screwy with max_depth == 0
 
-$VERSION = 0.08;
-@ISA = 'Exporter';
-@EXPORT = qw( find rule );
+$VERSION = 0.09;
+
+# we'd just inherit from Exporter, but I want the colon
+sub import {
+    my $pkg = shift;
+    my $to  = caller;
+    for my $sym ( qw( find rule ) ) {
+        no strict 'refs';
+        *{"$to\::$sym"} = \&{$sym};
+    }
+    for (grep /^:/, @_) {
+        my ($extension) = /^:(.*)/;
+        eval "require File::Find::Rule::$extension";
+        croak "couldn't bootstrap File::Find::Rule::$extension: $@" if $@;
+    }
+}
 
 =head1 NAME
 
@@ -293,7 +305,8 @@ L<Number::Compare> semantics.
                     }
                     return 0;
                 },
-              }
+              };
+            $self;
           };
         ++$i;
         no strict 'refs';
@@ -637,6 +650,24 @@ __END__
 
 =back
 
+=head2 Extensions
+
+Extension modules are available from CPAN in the File::Find::Rule
+namespace.  In order to use these extensions either use them directly:
+
+ use File::Find::Rule::ImageSize;
+ use File::Find::Rule::MMagic;
+
+ # now your rules can use the clauses supplied by the ImageSize and
+ # MMagic extension
+
+or, specify that File::Find::Rule should load them for you:
+
+ use File::Find::Rule qw( :ImageSize :MMagic );
+
+For notes on implementing your own extensions, consult
+L<File::Find::Rule::Extending>
+
 =head2 Further examples
 
 =over
@@ -704,7 +735,7 @@ and Andy Lester andy@petdance.com.
 
 =head1 COPYRIGHT
 
-Copyright (C) 2002 Richard Clamp.  All Rights Reserved.
+Copyright (C) 2002,2003 Richard Clamp.  All Rights Reserved.
 
 This module is free software; you can redistribute it and/or modify it
 under the same terms as Perl itself.
