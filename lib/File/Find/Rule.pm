@@ -1,4 +1,4 @@
-#       $Id: Rule.pm 1368 2003-08-03 22:06:41Z richardc $
+#       $Id: Rule.pm 1562 2003-09-08 17:40:48Z richardc $
 
 package File::Find::Rule;
 use strict;
@@ -10,7 +10,7 @@ use Carp qw/croak/;
 use File::Find (); # we're only wrapping for now
 use Cwd;           # 5.00503s File::Find goes screwy with max_depth == 0
 
-$VERSION = '0.20_03';
+$VERSION = '0.20';
 
 # we'd just inherit from Exporter, but I want the colon
 sub import {
@@ -469,6 +469,19 @@ for my $setter (qw( maxdepth mindepth )) {
     *$setter = $sub;
 }
 
+
+=item C<relative>
+
+Trim the leading portion of any path found
+
+=cut
+
+sub relative () {
+    my $self = _force_object shift;
+    $self->{relative} = 1;
+    $self;
+}
+
 =item C<not_*>
 
 Negated version of the rule.  An effective shortand related to ! in
@@ -518,11 +531,15 @@ sub in {
     my $fragment = $self->_compile( $self->{subs} );
     my @subs = @{ $self->{subs} };
 
+    warn "relative mode handed multiple paths - that's a bit silly\n"
+      if $self->{relative} && @_ > 1;
+
     my $code = 'sub {
         (my $path = $File::Find::name)  =~ s#^\./##;
         my @args = ($_, $File::Find::dir, $path);
         my $maxdepth = $self->{maxdepth};
         my $mindepth = $self->{mindepth};
+        my $relative = $self->{relative};
 
         # figure out the relative path and depth
         my $relpath = $File::Find::name;
@@ -542,7 +559,12 @@ sub in {
         my $discarded;
         return unless ' . $fragment . ';
         return if $discarded;
-        push @found, $path;
+        if ($relative && $relpath ne "") {
+            push @found, $relpath;
+        }
+        else {
+            push @found, $path;
+        }
     }';
 
     #use Data::Dumper;

@@ -1,8 +1,8 @@
 #!perl -w
-#       $Id: File-Find-Rule.t 1301 2003-06-22 21:50:42Z richardc $
+#       $Id: File-Find-Rule.t 1561 2003-09-08 17:14:21Z richardc $
 
 use strict;
-use Test::More tests => 36;
+use Test::More tests => 37;
 
 my $class;
 my @tests = qw( t/File-Find-Rule.t t/findrule.t );
@@ -259,6 +259,15 @@ is_deeply( [ find( file => '!name' => qr/^[^.]{1,8}(\.[^.]{0,3})?$/,
 is_deeply( [ find( maxdepth => 1, file => grep => [ qr/bytes./, [ qr/.?/ ] ], in => 't' ) ],
            [ 't/foobar' ],
            "grep" );
+
+
+
+# relative
+is_deeply( [ find( 'relative', maxdepth => 1, name => 'foobar', in => 't' ) ],
+           [ 'foobar' ],
+           'relative' );
+
+
 
 # bootstrapping extensions via import
 

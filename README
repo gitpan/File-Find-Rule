@@ -1,4 +1,4 @@
-README for File::Find::Rule 0.20_03
+README for File::Find::Rule 0.2
 
 =head1 NAME
 
@@ -48,17 +48,13 @@ What changed over the last 3 revisions
 
 =over
 
-=item 0.20_03 4th August, 2003
+=item 0.20 8th September, 2003
+
+	- relative flag
 
 	- Fix maxdepth? - this is undertested.
 
-
-=item 0.20_02 25th June, 2003
-
 	- MANIFEST fixes (thanks to the cpan smokers)
-
-
-=item 0.20_01	22nd June 2003
 
 	- split the documentation of the procedural interface out to
 	  File::Find::Rule::Procedural, as people often seem to get
@@ -75,6 +71,20 @@ What changed over the last 3 revisions
 
 	- Split the findrule tests into their own file, and just skip
 	  the tricky ones on Win32.
+
+
+=item 0.11    29th July, 2003
+
+        - Fix Win32 test failures (rt.cpan.org #3047)
+
+
+=item 0.10	10th March 2003
+
+	- fixup an accidental warning in the stat-based tests.  Caught
+	  by Alex Gough (rt.cpan.org #2138)
+	- make the findrule tests more win32 safe/shell independent (picked 
+	  up by Philip Newton)
+	- autogenerate READMEs from bits and pieces
 
 =back
 
