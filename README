@@ -1,4 +1,4 @@
-README for File::Find::Rule 0.25
+README for File::Find::Rule 0.26
 
 =head1 NAME
 
@@ -49,6 +49,15 @@ What changed over the last 3 revisions
 
 =over
 
+=item 0.26 Monday 10th November, 2003
+
+	Typo/thinko in File::Find::Rule::Extending corrected (spotted
+	by Jim Cromie)
+
+	Optimization to the stat-based tests.  They now compile to code
+	fragments saving much subroutine dispatch.
+
+
 =item 0.25 Wednesday 22nd October, 2003
 
 	applied a patch from Leon Brocard to make the tests ignore CVS dirs
@@ -65,11 +74,6 @@ What changed over the last 3 revisions
 	when you specify an extra of C<{ follow => 1 }> File::Find stops
 	populating $File::Find::topdir.  This leads to warnings noise so
 	instead we now track $topdir ourselves.
-
-
-=item 0.23 Friday 3rd October, 2003
-
-	make the extras hash work and add a proper test for it. (Doh!)
 
 =back
 
