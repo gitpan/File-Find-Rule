@@ -1,14 +1,9 @@
 MANIFEST
-README
 Changes
 Makefile.PL
-Build.PL
-META.yml
-lib/File/Find/Rule.pm
-lib/File/Find/Rule/Extending.pod
-lib/File/Find/Rule/Procedural.pod
+Rule.pm
+Extending.pod
 t/File-Find-Rule.t
-t/findrule.t
 t/foobar
 t/lib/File/Find/Rule/Test/ATeam.pm
 findrule
