@@ -1,4 +1,4 @@
-#       $Id: Rule.pm 1041 2003-01-21 10:53:10Z richardc $
+#       $Id: Rule.pm 1082 2003-03-10 02:04:34Z richardc $
 
 package File::Find::Rule;
 use strict;
@@ -10,7 +10,7 @@ use Carp qw/croak/;
 use File::Find (); # we're only wrapping for now
 use Cwd;           # 5.00503s File::Find goes screwy with max_depth == 0
 
-$VERSION = 0.09;
+$VERSION = '0.10';
 
 # we'd just inherit from Exporter, but I want the colon
 sub import {
@@ -299,7 +299,7 @@ L<Number::Compare> semantics.
               { rule => $t,
                 args => \@_,
                 code => sub {
-                    my $value = (stat $_)[$index];
+                    my $value = (stat $_)[$index] || 0;
                     for my $test (@tests) {
                         return 1 if $test->($value);
                     }
