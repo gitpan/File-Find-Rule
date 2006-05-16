@@ -2,7 +2,12 @@
 use ExtUtils::MakeMaker;
 WriteMakefile
 (
+          'PL_FILES' => {},
+          'INSTALLDIRS' => 'site',
           'NAME' => 'File::Find::Rule',
+          'EXE_FILES' => [
+                           'findrule'
+                         ],
           'VERSION_FROM' => 'lib/File/Find/Rule.pm',
           'PREREQ_PM' => {
                            'Test::More' => 0,
@@ -11,11 +16,6 @@ WriteMakefile
                            'Text::Glob' => 0,
                            'Number::Compare' => 0,
                            'Cwd' => 0
-                         },
-          'INSTALLDIRS' => 'site',
-          'EXE_FILES' => [
-                           'findrule'
-                         ],
-          'PL_FILES' => {}
+                         }
         )
 ;
