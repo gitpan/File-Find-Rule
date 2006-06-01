@@ -1,4 +1,4 @@
-#       $Id: /mirror/lab/perl/File-Find-Rule/lib/File/Find/Rule.pm 5171 2006-05-16T14:26:47.557232Z richardc  $
+#       $Id: /mirror/lab/perl/File-Find-Rule/lib/File/Find/Rule.pm 2102 2006-06-01T15:39:03.942922Z richardc  $
 
 package File::Find::Rule;
 use strict;
@@ -10,7 +10,7 @@ use Carp qw/croak/;
 use File::Find (); # we're only wrapping for now
 use Cwd;           # 5.00503s File::Find goes screwy with max_depth == 0
 
-$VERSION = '0.29';
+$VERSION = '0.30';
 
 # we'd just inherit from Exporter, but I want the colon
 sub import {
@@ -540,7 +540,7 @@ sub in {
 
     my $topdir;
     my $code = 'sub {
-        (my $path = $File::Find::name)  =~ s#^\./##;
+        (my $path = $File::Find::name)  =~ s#^(?:\./+)+##;
         my @args = ($_, $File::Find::dir, $path);
         my $maxdepth = $self->{maxdepth};
         my $mindepth = $self->{mindepth};

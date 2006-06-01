@@ -1,8 +1,8 @@
 #!perl -w
-#       $Id: /mirror/lab/perl/File-Find-Rule/t/File-Find-Rule.t 5170 2006-05-16T14:24:34.437119Z richardc  $
+#       $Id: /mirror/lab/perl/File-Find-Rule/t/File-Find-Rule.t 2100 2006-05-28T16:06:50.725367Z richardc  $
 
 use strict;
-use Test::More tests => 39;
+use Test::More tests => 41;
 
 my $class;
 my @tests = qw( t/File-Find-Rule.t t/findrule.t );
@@ -208,6 +208,7 @@ my $rule = find( or => [ find( name => qr/(\.svn|CVS)/,
                          find(),
                         ],
                  maxdepth => 1 );
+
 is_deeply( [ sort $rule->in( 't' ) ],
            [ 't', @tests, 't/foobar', 't/lib' ],
            "maxdepth == 1" );
@@ -215,7 +216,12 @@ is_deeply( [ sort $rule->in( 't/' ) ],
            [ 't', @tests, 't/foobar', 't/lib' ],
            "maxdepth == 1, trailing slash on the path" );
 
-
+is_deeply( [ sort $rule->in( './t' ) ],
+           [ 't', @tests, 't/foobar', 't/lib' ],
+           "maxdepth == 1, ./t" );
+is_deeply( [ sort $rule->in( './././///./t' ) ],
+           [ 't', @tests, 't/foobar', 't/lib' ],
+           "maxdepth == 1, ./././///./t" );
 
 my @ateam_path = qw( t/lib
                      t/lib/File

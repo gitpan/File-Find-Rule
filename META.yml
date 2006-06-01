@@ -1,6 +1,6 @@
 ---
 name: File-Find-Rule
-version: 0.29
+version: 0.30
 author:
   - |-
     Richard Clamp <richardc@unixbeard.net> with input gained from this
@@ -20,5 +20,5 @@ requires:
 provides:
   File::Find::Rule:
     file: lib/File/Find/Rule.pm
-    version: 0.29
-generated_by: Module::Build version 0.261
+    version: 0.30
+generated_by: Module::Build version 0.25
