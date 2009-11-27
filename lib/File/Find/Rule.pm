@@ -1,16 +1,14 @@
-#       $Id: /mirror/lab/perl/File-Find-Rule/lib/File/Find/Rule.pm 2102 2006-06-01T15:39:03.942922Z richardc  $
+#       $Id$
 
 package File::Find::Rule;
 use strict;
-use vars qw/$VERSION $AUTOLOAD/;
 use File::Spec;
 use Text::Glob 'glob_to_regex';
 use Number::Compare;
 use Carp qw/croak/;
 use File::Find (); # we're only wrapping for now
-use Cwd;           # 5.00503s File::Find goes screwy with max_depth == 0
 
-$VERSION = '0.30';
+our $VERSION = '0.31';
 
 # we'd just inherit from Exporter, but I want the colon
 sub import {
@@ -390,7 +388,7 @@ sub exec {
     $self;
 }
 
-=item ->grep( @specifiers );
+=item C<grep( @specifiers )>
 
 Opens a file and tests it each line at a time.
 
@@ -500,6 +498,7 @@ the procedural interface.
 
 sub DESTROY {}
 sub AUTOLOAD {
+    our $AUTOLOAD;
     $AUTOLOAD =~ /::not_([^:]*)$/
       or croak "Can't locate method $AUTOLOAD";
     my $method = $1;
@@ -577,7 +576,6 @@ sub in {
     #warn "Compiled sub: '$code'\n";
 
     my $sub = eval "$code" or die "compile error '$code' $@";
-    my $cwd = getcwd;
     for my $path (@_) {
         # $topdir is used for relative and maxdepth
         $topdir = $path;
@@ -587,7 +585,6 @@ sub in {
           unless $topdir eq '/';
         $self->_call_find( { %{ $self->{extras} }, wanted => $sub }, $path );
     }
-    chdir $cwd;
 
     return @found;
 }
@@ -622,7 +619,7 @@ then be queried using L</match>.  This allows you to use a rule as an
 iterator.
 
  my $rule = File::Find::Rule->file->name("*.jpeg")->start( "/web" );
- while ( my $image = $rule->match ) {
+ while ( defined ( my $image = $rule->match ) ) {
      ...
  }
 
@@ -718,10 +715,22 @@ documented in L<File::Find::Rule::Procedural>
 
 L</find>, L</rule>
 
+=head1 TAINT MODE INTERACTION
+
+As of 0.32 File::Find::Rule doesn't capture the current working directory in
+a taint-unsafe manner.  File::Find itself still does operations that the taint
+system will flag as insecure but you can use the L</extras> feature to ask
+L<File::Find> to internally C<untaint> file paths with a regex like so:
+
+    my $rule = File::Find::Rule->extras({ untaint => 1 });
+    
+Please consult L<File::Find>'s documentation for C<untaint>,
+C<untaint_pattern>, and C<untaint_skip> for more information.
+
 =head1 BUGS
 
-The code relies on qr// compiled regexes, therefore this module
-requires perl version 5.005_03 or newer.
+The code makes use of the C<our> keyword and as such requires perl version
+5.6.0 or newer.
 
 Currently it isn't possible to remove a clause from a rule object.  If
 this becomes a significant issue it will be addressed.
@@ -736,7 +745,7 @@ and Andy Lester andy@petdance.com.
 
 =head1 COPYRIGHT
 
-Copyright (C) 2002, 2003, 2004, 2006 Richard Clamp.  All Rights Reserved.
+Copyright (C) 2002, 2003, 2004, 2006, 2009 Richard Clamp.  All Rights Reserved.
 
 This module is free software; you can redistribute it and/or modify it
 under the same terms as Perl itself.

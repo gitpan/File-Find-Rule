@@ -1,4 +1,4 @@
-README for File::Find::Rule 0.30
+README for File::Find::Rule
 
 =head1 NAME
 
@@ -22,31 +22,32 @@ File::Find::Rule - Alternative interface to File::Find
   my @files = $rule->in( @INC );
 
 
-=head1 DEPENDENCIES
-
-This module has external dependencies on the following modules:
-
- Cwd
- File::Find
- File::Spec
- Number::Compare
- Test::More
- Text::Glob
-
 =head1 INSTALLATION
 
- perl Build.PL
- perl Build test
+ perl Makefile.PL
+ make test
 
 and if all goes well
 
- perl Build install
+ make install
 
 =head1 HISTORY
 
 What changed over the last 3 revisions
 
 =over
+
+=item 0.31 Friday 27th November 2009
+
+	Move to Makefile.PL
+	use Test::Differences in the testsuite if available.
+	Rearrange the testsuite so you don't keep tripping over yourself.
+	Dropped 5.00503 backwards compatibility, allows some 5.6isms and
+	dropping the shonky Cwd code.
+	All taint 'bugs' are now the same as the behaviour of File::Find,
+	documentation has been added to describe this.
+
+
 
 =item 0.30 Wednesday 1st June, 2006
 
@@ -58,12 +59,6 @@ What changed over the last 3 revisions
 
 	Kludged around {min,max}depth and trailing slashes in path
 	names.
-
-
-=item 0.28 Tuesday 18th May, 2004
-
-	exposed %X_tests and @stat_tests as package variables, and make a
-	_call_find method for File::Find::Rule::Filesys::Virtual
 
 =back
 
@@ -77,7 +72,7 @@ and Andy Lester andy@petdance.com.
 
 =head1 COPYRIGHT
 
-Copyright (C) 2002, 2003, 2004, 2006 Richard Clamp.  All Rights Reserved.
+Copyright (C) 2002, 2003, 2004, 2006, 2009 Richard Clamp.  All Rights Reserved.
 
 This module is free software; you can redistribute it and/or modify it
 under the same terms as Perl itself.

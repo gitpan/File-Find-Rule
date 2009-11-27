@@ -1,3 +1,13 @@
+0.31 Friday 27th November 2009
+	Move to Makefile.PL
+	use Test::Differences in the testsuite if available.
+	Rearrange the testsuite so you don't keep tripping over yourself.
+	Dropped 5.00503 backwards compatibility, allows some 5.6isms and
+	dropping the shonky Cwd code.
+	All taint 'bugs' are now the same as the behaviour of File::Find,
+	documentation has been added to describe this.
+
+
 0.30 Wednesday 1st June, 2006
 	Made './//././././///.//././/////./blah' be treated the same 
         as './blah' (it gets turned into 'blah')
